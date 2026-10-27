@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A.M.S. Login...</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #ecfdf5; font-family: sans-serif; color: #047857; }
+    .loader { text-align: center; }
+    .spinner { border: 4px solid #d1fae5; border-top: 4px solid #10b981; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <div class="spinner"></div>
+    <h3>กำลังยืนยันตัวตนผ่าน LINE...</h3>
+  </div>
+  
+  <script>
+    const MY_LIFF_ID = "2012247568-mR4hyUUN"; // LIFF ID ของคุณ
+    
+    // 🚨 สำคัญมาก: นำลิงก์ Web App URL (ที่ลงท้ายด้วย /exec) ของ Google Apps Script มาวางในเครื่องหมายคำพูดด้านล่าง
+    const GAS_EXEC_URL = "https://script.google.com/macros/s/AKfycbzq5VtX5rFGqRS1a0sXMYDaPB5hgLVijXYKkM3PCa7bzEB5y_1XyEhncB9D6nCp8YsS8w/exec"; 
+
+    liff.init({ liffId: MY_LIFF_ID }).then(() => {
+      if (!liff.isLoggedIn()) {
+        liff.login();
+      } else {
+        liff.getProfile().then(profile => {
+          // รีไดเรกต์ไปที่เว็บแอป GAS พร้อมแนบ UID ต่อท้าย URL ไปด้วย
+          window.location.replace(GAS_EXEC_URL + "?uid=" + encodeURIComponent(profile.userId));
+        }).catch(err => alert("Get Profile Error: " + err));
+      }
+    }).catch(err => alert("LIFF Init Error: " + err));
+  </script>
+</body>
+</html>
