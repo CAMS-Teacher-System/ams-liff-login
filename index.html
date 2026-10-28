@@ -2,43 +2,270 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A.M.S. Login...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>A.M.S. Authentication</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #ecfdf5; font-family: sans-serif; color: #047857; }
-    .loader { text-align: center; }
-    .spinner { border: 4px solid #d1fae5; border-top: 4px solid #10b981; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #10b981 100%);
+      font-family: 'Sarabun', sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* แสงตกแต่งพื้นหลัง */
+    .bg-glow {
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 70%);
+      border-radius: 50%;
+      animation: floatGlow 6s ease-in-out infinite alternate;
+    }
+    .bg-glow.top { top: -80px; right: -80px; }
+    .bg-glow.bottom { bottom: -100px; left: -80px; animation-delay: 2s; }
+
+    @keyframes floatGlow {
+      0% { transform: translateY(0px) scale(1); }
+      100% { transform: translateY(20px) scale(1.1); }
+    }
+
+    /* การ์ดตรงกลาง */
+    .auth-card {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(16px);
+      width: 88%;
+      max-width: 360px;
+      padding: 2.5rem 1.75rem;
+      border-radius: 1.75rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      text-align: center;
+      position: relative;
+      z-index: 10;
+      animation: cardEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes cardEnter {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* วงแหวนแอนิเมชันรอบไอคอน */
+    .icon-wrapper {
+      position: relative;
+      width: 88px;
+      height: 88px;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .pulse-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2.5px solid #10b981;
+      opacity: 0;
+      animation: pulseWave 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+    .pulse-ring.delay { animation-delay: 0.7s; }
+
+    @keyframes pulseWave {
+      0% { transform: scale(0.75); opacity: 0.8; }
+      100% { transform: scale(1.55); opacity: 0; }
+    }
+
+    .spinner-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 3.5px solid #d1fae5;
+      border-top-color: #059669;
+      border-right-color: #10b981;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    .center-icon {
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.75rem;
+      color: #047857;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+      z-index: 2;
+    }
+
+    /* ข้อความ */
+    .brand-badge {
+      display: inline-block;
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+    .title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0.4rem;
+    }
+    .subtitle {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      min-height: 1.4em;
+    }
+
+    /* แถบ Progress Bar วิ่งไปมา */
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    .progress-fill {
+      width: 45%;
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #047857);
+      border-radius: 999px;
+      position: absolute;
+      animation: progressSlide 1.4s ease-in-out infinite;
+    }
+    @keyframes progressSlide {
+      0% { left: -45%; width: 45%; }
+      50% { width: 60%; }
+      100% { left: 100%; width: 45%; }
+    }
+
+    .step-dots {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      color: #059669;
+      font-weight: 600;
+    }
+    .dot-bounce {
+      width: 6px;
+      height: 6px;
+      background: #10b981;
+      border-radius: 50%;
+      display: inline-block;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+    .dot-bounce:nth-child(1) { animation-delay: -0.32s; }
+    .dot-bounce:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+
+    .error-box {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      border-radius: 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
-  <div class="loader">
-    <div class="spinner"></div>
-    <h3>กำลังยืนยันตัวตนผ่าน LINE...</h3>
+  <div class="bg-glow top"></div>
+  <div class="bg-glow bottom"></div>
+
+  <div class="auth-card">
+    <div class="brand-badge">A.M.S. SMART SYSTEM</div>
+
+    <div class="icon-wrapper">
+      <div class="pulse-ring"></div>
+      <div class="pulse-ring delay"></div>
+      <div class="spinner-ring" id="spinnerRing"></div>
+      <div class="center-icon" id="centerIcon">
+        <i class="fab fa-line text-emerald-600"></i>
+      </div>
+    </div>
+
+    <h3 class="title" id="mainTitle">กำลังยืนยันตัวตน</h3>
+    <p class="subtitle" id="statusText">กำลังเชื่อมต่อกับระบบ LINE Official...</p>
+
+    <div class="progress-track" id="progressTrack">
+      <div class="progress-fill"></div>
+    </div>
+
+    <div class="step-dots" id="stepDots">
+      <span>โปรดรอสักครู่</span>
+      <span class="dot-bounce"></span>
+      <span class="dot-bounce"></span>
+      <span class="dot-bounce"></span>
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
   </div>
   
   <script>
     const MY_LIFF_ID = "2012247568-mR4hyUUN"; 
     const GAS_EXEC_URL = "https://script.google.com/macros/s/AKfycbzq5VtX5rFGqRS1a0sXMYDaPB5hgLVijXYKkM3PCa7bzEB5y_1XyEhncB9D6nCp8YsS8w/exec"; 
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetPage = urlParams.get('page') || 'booking';
+
+    // ปรับหัวข้อตามหน้าที่กำลังจะไป
+    if (targetPage === 'admin') {
+      document.getElementById('mainTitle').innerText = "เข้าสู่ศูนย์ควบคุม (Admin)";
+      document.getElementById('centerIcon').innerHTML = '<i class="fas fa-shield-alt"></i>';
+    } else {
+      document.getElementById('mainTitle').innerText = "ระบบขอใช้ห้องเรียน";
+      document.getElementById('centerIcon').innerHTML = '<i class="fas fa-calendar-check"></i>';
+    }
+
+    function showError(msg) {
+      document.getElementById('spinnerRing').style.borderTopColor = '#dc2626';
+      document.getElementById('progressTrack').style.display = 'none';
+      document.getElementById('stepDots').style.display = 'none';
+      const errBox = document.getElementById('errorBox');
+      errBox.style.display = 'block';
+      errBox.innerText = msg;
+    }
+
     liff.init({ liffId: MY_LIFF_ID }).then(() => {
       if (!liff.isLoggedIn()) {
-        liff.login({ redirectUri: window.location.href }); // บังคับกลับมาที่ URL เดิมพร้อมพารามิเตอร์
+        document.getElementById('statusText').innerText = "กำลังนำท่านไปหน้าล็อกอิน LINE...";
+        liff.login({ redirectUri: window.location.href });
       } else {
+        document.getElementById('statusText').innerText = "ตรวจสอบสิทธิ์สำเร็จ กำลังเปิดระบบ...";
         liff.getProfile().then(profile => {
-          
-          // 🛠️ อัปเดต: ค้นหาพารามิเตอร์แบบเจาะจง และสร้าง URL ใหม่ที่ชัวร์ 100%
-          let urlParams = new URLSearchParams(window.location.search);
-          let targetPage = urlParams.get('page') || 'booking'; 
-          
           let finalUrl = GAS_EXEC_URL + "?uid=" + encodeURIComponent(profile.userId) + "&page=" + targetPage;
-          
           window.location.replace(finalUrl);
-
-        }).catch(err => alert("Get Profile Error: " + err));
+        }).catch(err => showError("ไม่สามารถดึงข้อมูลโปรไฟล์ได้: " + err.message));
       }
-    }).catch(err => alert("LIFF Init Error: " + err));
+    }).catch(err => showError("การเชื่อมต่อ LIFF ขัดข้อง: " + err.message));
   </script>
 </body>
 </html>
