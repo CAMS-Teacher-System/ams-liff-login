@@ -19,20 +19,23 @@
   </div>
   
   <script>
-    const MY_LIFF_ID = "2012247568-mR4hyUUN"; // LIFF ID ของคุณ
-    
-    // 🚨 สำคัญมาก: นำลิงก์ Web App URL (ที่ลงท้ายด้วย /exec) ของ Google Apps Script มาวางในเครื่องหมายคำพูดด้านล่าง
+    const MY_LIFF_ID = "2012247568-mR4hyUUN"; 
     const GAS_EXEC_URL = "https://script.google.com/macros/s/AKfycbzq5VtX5rFGqRS1a0sXMYDaPB5hgLVijXYKkM3PCa7bzEB5y_1XyEhncB9D6nCp8YsS8w/exec"; 
 
     liff.init({ liffId: MY_LIFF_ID }).then(() => {
       if (!liff.isLoggedIn()) {
-        liff.login();
+        liff.login({ redirectUri: window.location.href }); // บังคับกลับมาที่ URL เดิมพร้อมพารามิเตอร์
       } else {
         liff.getProfile().then(profile => {
-          // ส่งต่อพารามิเตอร์ทั้งหมด (เช่น ?page=admin) ไปพร้อมกับ uid
-          let params = new URLSearchParams(window.location.search);
-          params.set('uid', profile.userId);
-          window.location.replace(GAS_EXEC_URL + "?" + params.toString());
+          
+          // 🛠️ อัปเดต: ค้นหาพารามิเตอร์แบบเจาะจง และสร้าง URL ใหม่ที่ชัวร์ 100%
+          let urlParams = new URLSearchParams(window.location.search);
+          let targetPage = urlParams.get('page') || 'booking'; 
+          
+          let finalUrl = GAS_EXEC_URL + "?uid=" + encodeURIComponent(profile.userId) + "&page=" + targetPage;
+          
+          window.location.replace(finalUrl);
+
         }).catch(err => alert("Get Profile Error: " + err));
       }
     }).catch(err => alert("LIFF Init Error: " + err));
