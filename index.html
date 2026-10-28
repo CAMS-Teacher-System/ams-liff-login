@@ -29,8 +29,10 @@
         liff.login();
       } else {
         liff.getProfile().then(profile => {
-          // รีไดเรกต์ไปที่เว็บแอป GAS พร้อมแนบ UID ต่อท้าย URL ไปด้วย
-          window.location.replace(GAS_EXEC_URL + "?uid=" + encodeURIComponent(profile.userId));
+          // ส่งต่อพารามิเตอร์ทั้งหมด (เช่น ?page=admin) ไปพร้อมกับ uid
+          let params = new URLSearchParams(window.location.search);
+          params.set('uid', profile.userId);
+          window.location.replace(GAS_EXEC_URL + "?" + params.toString());
         }).catch(err => alert("Get Profile Error: " + err));
       }
     }).catch(err => alert("LIFF Init Error: " + err));
